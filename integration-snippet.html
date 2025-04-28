@@ -1,0 +1,85 @@
+<!-- 
+  Security Scanner Widget Integration Example
+  Copy and paste this code into your Apps & Integrations.html file
+-->
+
+<!-- Add this in the appropriate section of your Apps & Integrations.html where you list integrations -->
+<div class="integration-card">
+  <div class="integration-card-header">
+    <img src="https://security-scanner-widget.vercel.app/assets/shield-icon.svg" alt="Security Scanner" class="integration-icon">
+    <div>
+      <h3 class="integration-title">Security Vulnerability Scanner</h3>
+      <span class="integration-badge security">Security</span>
+    </div>
+  </div>
+  
+  <div class="integration-card-body">
+    <p class="integration-description">
+      Scan your websites for security vulnerabilities including XSS, SQL Injection, outdated software, 
+      and more. Get detailed reports with severity levels and remediation steps.
+    </p>
+    
+    <!-- This container will hold the scanner when activated -->
+    <div id="security-scanner-container" class="security-scanner-container" style="display: none;"></div>
+  </div>
+  
+  <div class="integration-card-footer">
+    <button class="integration-button" onclick="toggleSecurityScanner()">Launch Scanner</button>
+  </div>
+</div>
+
+<!-- Add this script section at the end of your HTML body -->
+<script src="https://security-scanner-widget.vercel.app/embed.js"></script>
+<script>
+  // Security Scanner Widget Integration
+  let securityScannerVisible = false;
+  let securityScanner = null;
+  
+  function toggleSecurityScanner() {
+    const container = document.getElementById('security-scanner-container');
+    const toggleButton = document.querySelector('.integration-button');
+    
+    if (securityScannerVisible) {
+      // Hide the scanner
+      container.style.display = 'none';
+      container.innerHTML = '';
+      toggleButton.textContent = 'Launch Scanner';
+      securityScannerVisible = false;
+    } else {
+      // Show and initialize the scanner
+      container.style.display = 'block';
+      toggleButton.textContent = 'Close Scanner';
+      
+      securityScanner = SecurityScanner.init({
+        container: '#security-scanner-container',
+        apiKey: 'YOUR_API_KEY',  // Replace with your actual API key if needed
+        target: window.location.origin,  // Scans the current site by default
+        defaultScanType: 'quick',
+        theme: 'light',
+        width: '100%',
+        height: '500px',
+        onScanComplete: function(result) {
+          console.log('Scan completed:', result);
+          // You can add custom handling of scan results here
+        }
+      });
+      
+      securityScannerVisible = true;
+    }
+  }
+</script>
+
+<!-- Optional: Add these styles to your CSS if needed -->
+<style>
+  .security-scanner-container {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+  
+  /* Customize these styles to match your existing integration cards */
+  .integration-badge.security {
+    background-color: #2563eb;
+    color: white;
+  }
+</style>
