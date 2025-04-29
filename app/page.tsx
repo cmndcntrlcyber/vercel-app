@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-8">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto text-center">
         <header className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Security Scanner Widget</h1>
           <p className="text-gray-600">
@@ -18,7 +18,7 @@ export default function Home() {
         </header>
 
         <div className="mb-6 border-b border-gray-200">
-          <nav className="flex -mb-px">
+          <nav className="flex -mb-px justify-center">
             <button
               onClick={() => setActiveTab('demo')}
               className={`mr-4 py-2 px-1 border-b-2 font-medium text-sm ${
@@ -44,7 +44,7 @@ export default function Home() {
 
         <div className="bg-white p-6 rounded-lg shadow-md">
           {activeTab === 'demo' ? (
-            <div>
+            <div className="text-center">
               <h2 className="text-xl font-semibold mb-4">Security Scanner Demo</h2>
               <SecurityScanner />
             </div>
