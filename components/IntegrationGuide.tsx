@@ -45,19 +45,19 @@ export default function IntegrationGuide() {
   };
 
   return (
-    <div>
+    <div className="text-center">
       <h2 className="text-xl font-semibold mb-4">Integration Guide</h2>
       
-      <p className="mb-4">
+      <p className="mb-4 mx-auto max-w-3xl">
         You can integrate our security scanner widget into your own application using the JavaScript embed code or an iframe.
       </p>
       
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-2">Configuration</h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="form-group">
-            <label htmlFor="apiKey" className="form-label">API Key</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 max-w-4xl mx-auto">
+          <div className="form-group text-left">
+            <label htmlFor="apiKey" className="form-label block mb-1">API Key</label>
             <input
               id="apiKey"
               type="text"
@@ -68,8 +68,8 @@ export default function IntegrationGuide() {
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="targetUrl" className="form-label">Default Target URL</label>
+          <div className="form-group text-left">
+            <label htmlFor="targetUrl" className="form-label block mb-1">Default Target URL</label>
             <input
               id="targetUrl"
               type="url"
@@ -80,8 +80,8 @@ export default function IntegrationGuide() {
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="scanType" className="form-label">Default Scan Type</label>
+          <div className="form-group text-left">
+            <label htmlFor="scanType" className="form-label block mb-1">Default Scan Type</label>
             <select
               id="scanType"
               className="form-select"
@@ -93,8 +93,8 @@ export default function IntegrationGuide() {
             </select>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="theme" className="form-label">Theme</label>
+          <div className="form-group text-left">
+            <label htmlFor="theme" className="form-label block mb-1">Theme</label>
             <select
               id="theme"
               className="form-select"
@@ -107,8 +107,8 @@ export default function IntegrationGuide() {
             </select>
           </div>
           
-          <div className="form-group">
-            <label htmlFor="width" className="form-label">Width</label>
+          <div className="form-group text-left">
+            <label htmlFor="width" className="form-label block mb-1">Width</label>
             <input
               id="width"
               type="text"
@@ -119,8 +119,8 @@ export default function IntegrationGuide() {
             />
           </div>
           
-          <div className="form-group">
-            <label htmlFor="height" className="form-label">Height</label>
+          <div className="form-group text-left">
+            <label htmlFor="height" className="form-label block mb-1">Height</label>
             <input
               id="height"
               type="text"
@@ -135,14 +135,14 @@ export default function IntegrationGuide() {
       
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-2">JavaScript Embed Code</h3>
-        <p className="mb-2">Copy and paste this code to embed the security scanner in your website:</p>
+        <p className="mb-2 mx-auto max-w-3xl">Copy and paste this code to embed the security scanner in your website:</p>
         
         <div className="bg-gray-100 p-4 rounded-md mb-2 overflow-auto" style={{ maxHeight: '200px' }}>
           <pre><code>{generateEmbedCode()}</code></pre>
         </div>
         
         <button
-          className="button button-primary"
+          className="button button-primary mx-auto"
           onClick={() => {
             navigator.clipboard.writeText(generateEmbedCode());
             alert('Embed code copied to clipboard!');
@@ -154,14 +154,14 @@ export default function IntegrationGuide() {
       
       <div className="mb-6">
         <h3 className="text-lg font-medium mb-2">Iframe Embed Code</h3>
-        <p className="mb-2">Alternatively, you can use an iframe to embed the scanner:</p>
+        <p className="mb-2 mx-auto max-w-3xl">Alternatively, you can use an iframe to embed the scanner:</p>
         
         <div className="bg-gray-100 p-4 rounded-md mb-2 overflow-auto" style={{ maxHeight: '200px' }}>
           <pre><code>{generateIframeCode()}</code></pre>
         </div>
         
         <button
-          className="button button-primary"
+          className="button button-primary mx-auto"
           onClick={() => {
             navigator.clipboard.writeText(generateIframeCode());
             alert('Iframe code copied to clipboard!');
@@ -173,7 +173,7 @@ export default function IntegrationGuide() {
       
       <div>
         <h3 className="text-lg font-medium mb-2">API Documentation</h3>
-        <p>
+        <p className="mx-auto max-w-3xl">
           For more advanced integrations, you can use our API directly. Please refer to our 
           <a href="#" className="text-blue-600 hover:underline"> API documentation</a> for more details.
         </p>
