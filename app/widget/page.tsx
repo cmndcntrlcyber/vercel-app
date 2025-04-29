@@ -1,37 +1,18 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import SecurityScanner from '../../components/SecurityScanner';
-import { useEffect } from 'react';
+
+// Create a separate client component for theme handling
+import WidgetThemeHandler from './WidgetThemeHandler';
 
 export default function WidgetPage() {
-  const searchParams = useSearchParams();
-  
-  // Apply theme based on URL parameters
-  useEffect(() => {
-    const theme = searchParams.get('theme') || 'light';
-    
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark-theme');
-    } else if (theme === 'auto') {
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add('dark-theme');
-      }
-      
-      // Listen for theme changes
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
-        if (event.matches) {
-          document.documentElement.classList.add('dark-theme');
-        } else {
-          document.documentElement.classList.remove('dark-theme');
-        }
-      });
-    }
-  }, [searchParams]);
-
   return (
     <div className="widget-page">
-      <SecurityScanner />
+      <Suspense fallback={<div>Loading...</div>}>
+        <WidgetThemeHandler />
+        <SecurityScanner />
+      </Suspense>
     </div>
   );
 }
