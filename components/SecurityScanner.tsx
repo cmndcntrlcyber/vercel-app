@@ -135,7 +135,7 @@ export default function SecurityScanner() {
       
       // Add scan-specific parameters
       if (scanType === 'ports') {
-        advancedOptions.ports = "1-65535"; // Default common ports
+        advancedOptions.ports = "80,443,8080,8443"; // Default common ports
       } else if (scanType === 'subdomain') {
         advancedOptions.threads = 10; // Reasonable thread count
       } else if (scanType === 'fuzz') {
@@ -212,14 +212,6 @@ export default function SecurityScanner() {
             Powered by mcp.attck-deploy.net security scanning service
           </small>
         </div>
-      </div>
-      
-      <div className="widget-content">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="target" className="form-label">Target URL/Domain/IP</label>
-            <input
-              id="target"
               type="text"
               className="form-input"
               value={target}
