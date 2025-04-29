@@ -135,7 +135,7 @@ export default function SecurityScanner() {
       
       // Add scan-specific parameters
       if (scanType === 'ports') {
-        advancedOptions.ports = "80,443,8080,8443"; // Default common ports
+        advancedOptions.ports = "1-65535"; // Default common ports
       } else if (scanType === 'subdomain') {
         advancedOptions.threads = 10; // Reasonable thread count
       } else if (scanType === 'fuzz') {
