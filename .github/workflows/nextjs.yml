@@ -1,4 +1,4 @@
-name: NodeJS with Webpack
+name: Next.js Build and Deploy
 
 on:
   push:
@@ -25,7 +25,6 @@ jobs:
     - name: Install Dependencies
       run: |
         npm install
-        npm install -D webpack-cli  # Explicitly install webpack-cli
 
     - name: Build
       run: |
