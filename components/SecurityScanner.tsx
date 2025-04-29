@@ -208,10 +208,10 @@ export default function SecurityScanner() {
         <div className="scan-status">
           {isScanning && <span className="status-badge status-scanning">Scanning...</span>}
           {scanStatusMessage && <p className="status-message">{scanStatusMessage}</p>}
-          <small style={{ display: 'block', marginTop: '0.5rem', color: '#666' }}>
-            Powered by mcp.attck-deploy.net security scanning service
-          </small>
-        </div>
+          <div className="form-group">
+            <label htmlFor="target" className="form-label">Target URL/Domain/IP</label>
+            <input
+              id="target"
               type="text"
               className="form-input"
               value={target}
