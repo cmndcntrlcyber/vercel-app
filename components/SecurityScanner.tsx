@@ -208,6 +208,9 @@ export default function SecurityScanner() {
         <div className="scan-status">
           {isScanning && <span className="status-badge status-scanning">Scanning...</span>}
           {scanStatusMessage && <p className="status-message">{scanStatusMessage}</p>}
+        </div>
+        
+        <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="target" className="form-label">Target URL/Domain/IP</label>
             <input
