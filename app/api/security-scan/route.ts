@@ -66,18 +66,31 @@ async function callMcpTool(toolName: string, args: any) {
     // For the remote server, we need to format arguments differently based on the tool
     let formattedArgs = '';
     
+    // Extract the domain name from URLs (remove http/https prefix)
+    const getDomainFromUrl = (url: string): string => {
+      try {
+        // Remove protocol and path, just get the domain
+        return url.replace(/^(https?:\/\/)/, '').split('/')[0];
+      } catch (e) {
+        return url;
+      }
+    };
+    
+    // Get clean domain (without protocol)
+    const cleanDomain = getDomainFromUrl(args.target);
+    
     // Handle tool-specific argument formatting
     if (toolName === 'subfinder') {
-      // subfinder expects -d for domain
-      formattedArgs += `-d ${args.target} `;
+      // subfinder expects -d for domain (without http/https)
+      formattedArgs += `-d ${cleanDomain} `;
       if (args.threads) formattedArgs += `-t ${args.threads} `;
       if (args.timeout) formattedArgs += `-timeout ${args.timeout} `;
       // Add silent mode for cleaner output
       formattedArgs += `-silent `;
     } 
     else if (toolName === 'naabu') {
-      // naabu expects -host for target
-      formattedArgs += `-host ${args.target} `;
+      // naabu expects -host for target (without http/https)
+      formattedArgs += `-host ${cleanDomain} `;
       if (args.ports) formattedArgs += `-p ${args.ports} `;
       if (args.threads) formattedArgs += `-c ${args.threads} `;
       // Add silent mode for cleaner output
@@ -117,9 +130,15 @@ async function callMcpTool(toolName: string, args: any) {
       }
       // Add silent mode
       formattedArgs += `-s `;
+      
+      // Add the user agent directly for ffuf (not in the common section below)
+      if (args.userAgent && typeof args.userAgent === 'string' && args.userAgent.trim() !== '') {
+        formattedArgs += `-H "User-Agent: ${args.userAgent}" `;
+      }
     }
     else if (toolName === 'gobuster') {
       // gobuster requires a mode (dir is most common)
+      // For URLs, must include the protocol
       formattedArgs += `dir -u ${args.target} `;
       if (args.threads) formattedArgs += `-t ${args.threads} `;
       // Add a default wordlist if not provided
@@ -131,6 +150,12 @@ async function callMcpTool(toolName: string, args: any) {
       }
       // Add quiet mode
       formattedArgs += `-q `;
+      
+      // For gobuster, we add the User-Agent ONLY if it's a non-empty string
+      // Use the correct flag format for gobuster (-a, not --user-agent)
+      if (args.userAgent && typeof args.userAgent === 'string' && args.userAgent.trim() !== '') {
+        formattedArgs += `-a "${args.userAgent}" `;
+      }
     }
     else if (toolName === 'dnsx') {
       // dnsx uses -d for domain
@@ -148,21 +173,53 @@ async function callMcpTool(toolName: string, args: any) {
       formattedArgs += `-silent -json `;
     }
     
-    // Add any custom headers if provided
-    if (args.headers && typeof args.headers === 'object') {
-      const headerString = JSON.stringify(args.headers);
-      formattedArgs += `--headers ${headerString} `;
+    // Tool-specific advanced arguments (only add if not empty)
+    // Different tools use different flag formats (single dash vs double dash)
+    // We'll skip adding these custom flags for tools that don't support them
+    
+    // Flag prefix based on the tool (most tools use single dash, some use double)
+    const usesDoubleDash = ['ffuf', 'gobuster'].includes(toolName);
+    const flagPrefix = usesDoubleDash ? '--' : '-';
+    
+    // Add any custom headers if provided and not empty
+    if (args.headers && typeof args.headers === 'object' && Object.keys(args.headers).length > 0) {
+      // Only add headers for tools that support it (not all do)
+      if (['httpx', 'ffuf', 'gobuster'].includes(toolName)) {
+        const headerString = JSON.stringify(args.headers);
+        formattedArgs += `${flagPrefix}headers ${headerString} `;
+      }
     }
 
-    // Add user agent if provided
-    if (args.userAgent) {
-      formattedArgs += `--userAgent "${args.userAgent}" `;
+    // Add user agent if provided and not empty
+    if (args.userAgent && typeof args.userAgent === 'string' && args.userAgent.trim() !== '') {
+      // Only add user agent for tools that support it (and not already added)
+      // Note: ffuf and gobuster are handled separately in their specific sections
+      if (toolName === 'httpx') {
+        // For httpx, user-agent needs to be added as a header
+        formattedArgs += `-H "User-Agent: ${args.userAgent}" `;
+      }
     }
     
-    // Add timeout if provided
-    if (args.timeout) {
-      formattedArgs += `--timeout ${args.timeout} `;
+    // Add timeout if provided and valid - most tools support this but with different names
+    if (args.timeout && !isNaN(Number(args.timeout)) && Number(args.timeout) > 0) {
+      // Each tool has its own timeout flag
+      if (toolName === 'subfinder') {
+        formattedArgs += `-timeout ${args.timeout} `;
+      } else if (toolName === 'naabu') {
+        formattedArgs += `-timeout ${args.timeout}s `;
+      } else if (['httpx', 'tlsx', 'dnsx'].includes(toolName)) {
+        formattedArgs += `-timeout ${args.timeout} `;
+      } else if (toolName === 'ffuf') {
+        formattedArgs += `${flagPrefix}timeout ${args.timeout} `;
+      } else if (toolName === 'gobuster') {
+        // Gobuster uses a different flag for timeout
+        formattedArgs += `-to ${args.timeout}s `;
+      }
+      // Skip for tools that don't support timeout
     }
+    
+    // Log the formatted arguments for debugging
+    console.log(`Formatted arguments for ${toolName}: ${formattedArgs}`);
     
     // Make a request to the external MCP server
     const response = await fetch('https://mcp.attck-deploy.net/api/run', {
