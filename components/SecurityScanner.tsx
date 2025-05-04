@@ -77,6 +77,17 @@ export default function SecurityScanner() {
   const [timeout, setTimeout] = useState(30);
   const [customHeaders, setCustomHeaders] = useState('');
   
+  // FFUF-specific options
+  const [wordlist, setWordlist] = useState('common.txt');
+  const [extensions, setExtensions] = useState('php,html,js');
+  const [httpMethods, setHttpMethods] = useState('GET');
+  const [matchCodes, setMatchCodes] = useState('200,301,302,307,401,403');
+  const [filterCodes, setFilterCodes] = useState('404');
+  const [threads, setThreads] = useState(40);
+  const [delay, setDelay] = useState(0);
+  const [recursion, setRecursion] = useState(false);
+  const [recursionDepth, setRecursionDepth] = useState(1);
+  
   // Dark mode detection
   const [isDarkMode, setIsDarkMode] = useState(false);
   
@@ -165,7 +176,20 @@ export default function SecurityScanner() {
       } else if (scanType === 'subdomain') {
         advancedOptions.threads = 10; // Reasonable thread count
       } else if (scanType === 'fuzz') {
-        advancedOptions.threads = 10;
+        // Enhanced FFUF parameters
+        advancedOptions.wordlist = wordlist;
+        advancedOptions.extensions = extensions;
+        advancedOptions.methods = httpMethods;
+        advancedOptions.match_codes = matchCodes;
+        advancedOptions.filter_codes = filterCodes;
+        advancedOptions.threads = threads;
+        advancedOptions.delay = delay;
+        
+        // Add recursion settings if enabled
+        if (recursion) {
+          advancedOptions.recursion = true;
+          advancedOptions.recursion_depth = recursionDepth;
+        }
       }
       
       setScanStatusMessage(`Connecting to security scanner at mcp.attck-deploy.net...`);
@@ -229,21 +253,22 @@ export default function SecurityScanner() {
 
   return (
     <div className="widget-container" style={{
-      maxWidth: "800px",
+      maxWidth: "100%",
       margin: "0 auto",
-      padding: "20px",
+      padding: "16px",
       boxSizing: "border-box",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       width: "100%",
       backgroundColor: isDarkMode ? "#111827" : "#ffffff",
-      color: isDarkMode ? "#ffffff" : "#1a202c"
+      color: isDarkMode ? "#ffffff" : "#1a202c",
+      borderRadius: "8px"
     }}>
       <div className="widget-header" style={{
         width: "100%",
         textAlign: "center",
-        marginBottom: "30px"
+        marginBottom: "20px"
       }}>
 
         <div className="scan-status">
@@ -261,21 +286,44 @@ export default function SecurityScanner() {
         }}>
           <div style={{
             display: "flex",
+            flexDirection: window.innerWidth < 768 ? "column" : "row",
             justifyContent: "space-between",
             width: "100%",
             backgroundColor: "#2563eb",
-            borderRadius: "8px",
-            padding: "20px",
+            borderRadius: "12px",
+            padding: window.innerWidth < 768 ? "16px" : "24px",
             color: "white",
-            marginBottom: "20px"
+            marginBottom: "20px",
+            boxShadow: "0 4px 15px rgba(37, 99, 235, 0.3)"
           }}>
             <div style={{
               flexGrow: 1,
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              alignItems: "flex-start"
+              alignItems: "flex-start",
+              paddingRight: window.innerWidth < 768 ? "0" : "24px",
+              borderRight: window.innerWidth < 768 ? "none" : "1px solid rgba(255, 255, 255, 0.2)",
+              borderBottom: window.innerWidth < 768 ? "1px solid rgba(255, 255, 255, 0.2)" : "none",
+              paddingBottom: window.innerWidth < 768 ? "12px" : "0",
+              marginBottom: window.innerWidth < 768 ? "12px" : "0"
             }}>
+              <h3 style={{ margin: "0 0 10px 0", fontSize: "1.5rem", fontWeight: "bold" }}>Security Scanner</h3>
+              <p style={{ margin: "0 0 15px 0", fontSize: "0.95rem", opacity: "0.9" }}>
+                Scan websites, domains, and IP addresses for security vulnerabilities
+              </p>
+              <div style={{ display: "flex", alignItems: "center", marginTop: "auto" }}>
+                <div style={{ 
+                  backgroundColor: "rgba(255, 255, 255, 0.15)", 
+                  padding: "6px 10px", 
+                  borderRadius: "4px", 
+                  display: "flex", 
+                  alignItems: "center",
+                  marginRight: "10px"
+                }}>
+                  <span style={{ fontSize: "0.85rem" }}>Powered by MCP Security Tools</span>
+                </div>
+              </div>
             </div>
             
             <div style={{
@@ -283,16 +331,18 @@ export default function SecurityScanner() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
-              alignItems: "flex-end",
-              gap: "15px"
+              alignItems: "flex-start",
+              paddingLeft: window.innerWidth < 768 ? "0" : "24px",
+              gap: "16px"
             }}>
               <div style={{ width: "100%" }}>
                 <label htmlFor="target" className="form-label" style={{
                   display: "block",
-                  marginBottom: "5px",
+                  marginBottom: "8px",
                   fontWeight: "bold",
                   color: "white",
-                  textAlign: "left"
+                  textAlign: "left",
+                  fontSize: "0.95rem"
                 }}>Target URL/Domain/IP</label>
                 <input
                   id="target"
@@ -300,10 +350,11 @@ export default function SecurityScanner() {
                   className="form-input"
                   style={{
                     width: "100%",
-                    padding: "10px",
-                    borderRadius: "4px",
+                    padding: "12px",
+                    borderRadius: "6px",
                     border: "none",
-                    fontSize: "16px"
+                    fontSize: "16px",
+                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)"
                   }}
                   value={target}
                   onChange={(e) => setTarget(e.target.value)}
@@ -315,21 +366,28 @@ export default function SecurityScanner() {
               <div style={{ width: "100%" }}>
                 <label htmlFor="scanType" className="form-label" style={{
                   display: "block",
-                  marginBottom: "5px",
+                  marginBottom: "8px",
                   fontWeight: "bold",
                   color: "white",
-                  textAlign: "left"
+                  textAlign: "left",
+                  fontSize: "0.95rem"
                 }}>Scan Type</label>
                 <select
                   id="scanType"
                   className="form-select"
                   style={{
                     width: "100%",
-                    padding: "10px",
-                    borderRadius: "4px",
+                    padding: "12px",
+                    borderRadius: "6px",
                     border: "none",
                     fontSize: "16px",
-                    backgroundColor: "white"
+                    backgroundColor: "white",
+                    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
+                    appearance: "none",
+                    backgroundImage: "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 1rem center",
+                    backgroundSize: "1em"
                   }}
                   value={scanType}
                   onChange={(e) => setScanType(e.target.value)}
@@ -353,13 +411,16 @@ export default function SecurityScanner() {
                   backgroundColor: '#0070f3',
                   color: 'white',
                   border: 'none',
-                  padding: '12px 24px',
-                  borderRadius: '4px',
+                  padding: '14px 24px',
+                  borderRadius: '6px',
                   cursor: isScanning ? 'not-allowed' : 'pointer',
                   opacity: isScanning ? 0.7 : 1,
                   fontSize: '16px',
                   fontWeight: 'bold',
-                  width: '100%'
+                  width: '100%',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.2s ease',
+                  marginTop: '6px'
                 }}
               >
                 {isScanning ? 'Scanning...' : 'Start Security Audit'}
@@ -391,14 +452,16 @@ export default function SecurityScanner() {
             
             {showAdvanced && (
               <div className="advanced-options" style={{ 
-                border: isDarkMode ? '1px solid #eaeaea' : '1px solid #eaeaea',
-                borderRadius: '5px',
-                padding: '1rem',
+                border: isDarkMode ? '1px solid #2d3748' : '1px solid #eaeaea',
+                borderRadius: '8px',
+                padding: '1.25rem',
                 marginBottom: '1rem',
                 width: '100%',
                 backgroundColor: isDarkMode ? '#1a202c' : 'white',
-                color: isDarkMode ? '#e2e8f0' : '#1a202c'
+                color: isDarkMode ? '#e2e8f0' : '#1a202c',
+                boxShadow: isDarkMode ? '0 4px 10px rgba(0, 0, 0, 0.2)' : '0 4px 10px rgba(0, 0, 0, 0.05)'
               }}>
+                {/* General advanced options */}
                 <div className="form-group">
                   <label htmlFor="authToken" className="form-label">Authentication Token</label>
                   <input
@@ -451,6 +514,330 @@ export default function SecurityScanner() {
                     }}
                   />
                 </div>
+                
+                {/* FFUF-specific options */}
+                {scanType === 'fuzz' && (
+                  <div style={{ 
+                    marginTop: '15px', 
+                    borderTop: isDarkMode ? '1px solid #2d3748' : '1px solid #eaeaea',
+                    paddingTop: '15px'
+                  }}>
+                    <h4 style={{ 
+                      marginTop: 0, 
+                      marginBottom: '15px', 
+                      fontSize: '1.05rem', 
+                      color: isDarkMode ? 'white' : '#333',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      Fuzzing Parameters
+                      <span style={{ 
+                        fontSize: '0.8rem', 
+                        color: isDarkMode ? '#aaa' : '#666',
+                        fontWeight: 'normal'
+                      }}>
+                        (powered by FFUF)
+                      </span>
+                    </h4>
+
+                    {/* Organized into logical groups with better styling */}
+                    <div style={{ marginBottom: '15px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', marginBottom: '15px' }}>
+                        {/* Target options group */}
+                        <div style={{ 
+                          flex: '1 1 300px', 
+                          padding: '12px',
+                          border: isDarkMode ? '1px solid #2d3748' : '1px solid #eaeaea',
+                          borderRadius: '6px',
+                          backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb'
+                        }}>
+                          <h5 style={{ 
+                            marginTop: 0, 
+                            marginBottom: '10px', 
+                            fontSize: '0.95rem', 
+                            color: isDarkMode ? 'white' : '#333',
+                            borderBottom: isDarkMode ? '1px solid #3e4c61' : '1px solid #eaeaea',
+                            paddingBottom: '6px'
+                          }}>
+                            Target Options
+                          </h5>
+                          
+                          <div className="form-group" style={{ marginBottom: '12px' }}>
+                            <label htmlFor="wordlist" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              Wordlist
+                              <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                    title="Dictionary of paths to check on the target server">
+                                ⓘ
+                              </span>
+                            </label>
+                            <select
+                              id="wordlist"
+                              className="form-select"
+                              value={wordlist}
+                              onChange={(e) => setWordlist(e.target.value)}
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                fontSize: '0.9rem'
+                              }}
+                            >
+                              <option value="common.txt">Common Endpoints (small)</option>
+                              <option value="directory-list-2.3-small.txt">Directory List 2.3 (small)</option>
+                              <option value="directory-list-2.3-medium.txt">Directory List 2.3 (medium)</option>
+                              <option value="big.txt">Big Wordlist (comprehensive)</option>
+                              <option value="raft-large-directories.txt">RAFT Large Directories</option>
+                              <option value="api-endpoints.txt">API Endpoints</option>
+                              <option value="swagger-wordlist.txt">Swagger/OpenAPI Endpoints</option>
+                            </select>
+                          </div>
+                          
+                          <div className="form-group" style={{ marginBottom: '12px' }}>
+                            <label htmlFor="extensions" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              File Extensions
+                              <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                    title="File extensions to append to each wordlist entry (comma-separated)">
+                                ⓘ
+                              </span>
+                            </label>
+                            <input
+                              id="extensions"
+                              type="text"
+                              className="form-input"
+                              value={extensions}
+                              onChange={(e) => setExtensions(e.target.value)}
+                              placeholder="php,html,js,asp"
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          </div>
+                          
+                          <div className="form-group">
+                            <label htmlFor="httpMethods" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              HTTP Methods
+                              <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                    title="HTTP methods to use in requests (comma-separated)">
+                                ⓘ
+                              </span>
+                            </label>
+                            <input
+                              id="httpMethods"
+                              type="text"
+                              className="form-input"
+                              value={httpMethods}
+                              onChange={(e) => setHttpMethods(e.target.value)}
+                              placeholder="GET,POST,PUT"
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          </div>
+                        </div>
+                          
+                        {/* Matching and filtering options */}
+                        <div style={{ 
+                          flex: '1 1 300px', 
+                          padding: '12px',
+                          border: isDarkMode ? '1px solid #2d3748' : '1px solid #eaeaea',
+                          borderRadius: '6px',
+                          backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb'
+                        }}>
+                          <h5 style={{ 
+                            marginTop: 0, 
+                            marginBottom: '10px', 
+                            fontSize: '0.95rem', 
+                            color: isDarkMode ? 'white' : '#333',
+                            borderBottom: isDarkMode ? '1px solid #3e4c61' : '1px solid #eaeaea',
+                            paddingBottom: '6px'
+                          }}>
+                            Response Matching
+                          </h5>
+                          
+                          <div className="form-group" style={{ marginBottom: '12px' }}>
+                            <label htmlFor="matchCodes" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              Match Status Codes
+                              <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                    title="HTTP status codes to consider as 'found' (comma-separated)">
+                                ⓘ
+                              </span>
+                            </label>
+                            <input
+                              id="matchCodes"
+                              type="text"
+                              className="form-input"
+                              value={matchCodes}
+                              onChange={(e) => setMatchCodes(e.target.value)}
+                              placeholder="200,301,302,307"
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          </div>
+                          
+                          <div className="form-group">
+                            <label htmlFor="filterCodes" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              Filter Status Codes
+                              <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                    title="HTTP status codes to exclude from results (comma-separated)">
+                                ⓘ
+                              </span>
+                            </label>
+                            <input
+                              id="filterCodes"
+                              type="text"
+                              className="form-input"
+                              value={filterCodes}
+                              onChange={(e) => setFilterCodes(e.target.value)}
+                              placeholder="404,400,500"
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Performance options */}
+                      <div style={{ 
+                        padding: '12px',
+                        border: isDarkMode ? '1px solid #2d3748' : '1px solid #eaeaea',
+                        borderRadius: '6px',
+                        backgroundColor: isDarkMode ? '#1e293b' : '#f9fafb'
+                      }}>
+                        <h5 style={{ 
+                          marginTop: 0, 
+                          marginBottom: '10px', 
+                          fontSize: '0.95rem', 
+                          color: isDarkMode ? 'white' : '#333',
+                          borderBottom: isDarkMode ? '1px solid #3e4c61' : '1px solid #eaeaea',
+                          paddingBottom: '6px'
+                        }}>
+                          Performance Settings
+                        </h5>
+                        
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
+                          <div className="form-group" style={{ flex: '1 1 120px' }}>
+                            <label htmlFor="threads" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              Threads
+                              <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                    title="Number of concurrent requests (higher = faster but more resource intensive)">
+                                ⓘ
+                              </span>
+                            </label>
+                            <input
+                              id="threads"
+                              type="number"
+                              className="form-input"
+                              value={threads}
+                              onChange={(e) => setThreads(parseInt(e.target.value) || 40)}
+                              min="1"
+                              max="200"
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          </div>
+                          
+                          <div className="form-group" style={{ flex: '1 1 120px' }}>
+                            <label htmlFor="delay" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                              Delay (ms)
+                              <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                    title="Delay between requests in milliseconds (higher = less aggressive scanning)">
+                                ⓘ
+                              </span>
+                            </label>
+                            <input
+                              id="delay"
+                              type="number"
+                              className="form-input"
+                              value={delay}
+                              onChange={(e) => setDelay(parseInt(e.target.value) || 0)}
+                              min="0"
+                              max="5000"
+                              style={{
+                                width: '100%',
+                                padding: '8px',
+                                borderRadius: '4px',
+                                border: '1px solid #ddd',
+                                fontSize: '0.9rem'
+                              }}
+                            />
+                          </div>
+                          
+                          <div className="form-group" style={{ flex: '2 1 250px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                              <input
+                                id="recursion"
+                                type="checkbox"
+                                checked={recursion}
+                                onChange={(e) => setRecursion(e.target.checked)}
+                                style={{ marginRight: '8px' }}
+                              />
+                              <label htmlFor="recursion" className="form-label" style={{ margin: 0, fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                                Enable Directory Recursion
+                                <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                      title="Automatically scan discovered directories">
+                                  ⓘ
+                                </span>
+                              </label>
+                            </div>
+                            
+                            {recursion && (
+                              <div style={{ marginLeft: '24px', marginTop: '8px' }}>
+                                <label htmlFor="recursionDepth" className="form-label" style={{ fontSize: '0.85rem', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+                                  Recursion Depth
+                                  <span style={{ marginLeft: '5px', cursor: 'help', color: '#6b7280', fontSize: '0.9em' }} 
+                                        title="Maximum directory depth to scan (higher values take longer)">
+                                    ⓘ
+                                  </span>
+                                </label>
+                                <input
+                                  id="recursionDepth"
+                                  type="number"
+                                  className="form-input"
+                                  value={recursionDepth}
+                                  onChange={(e) => setRecursionDepth(parseInt(e.target.value) || 1)}
+                                  min="1"
+                                  max="5"
+                                  style={{ 
+                                    width: '80px',
+                                    padding: '8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ddd',
+                                    fontSize: '0.9rem'
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -470,13 +857,13 @@ export default function SecurityScanner() {
         
         {scanResult && (
           <div className="results-container" style={{ 
-            marginTop: '2rem',
+            marginTop: '1.5rem',
             width: '100%',
-            maxWidth: '600px',
-            margin: '2rem auto',
+            maxWidth: '100%',
+            margin: '1.5rem auto',
             border: isDarkMode ? '1px solid #2d3748' : '1px solid #eaeaea',
             borderRadius: '8px',
-            padding: '20px',
+            padding: '16px',
             boxShadow: isDarkMode ? '0 2px 10px rgba(0,0,0,0.3)' : '0 2px 10px rgba(0,0,0,0.1)',
             backgroundColor: isDarkMode ? '#1a202c' : 'white',
             color: isDarkMode ? 'white' : 'black'
@@ -544,18 +931,55 @@ export default function SecurityScanner() {
             )}
             
             {scanResult.rawOutput && (
-              <div style={{ marginTop: '2rem' }}>
-                <h4 style={{ color: isDarkMode ? 'white' : '#1a202c' }}>Raw Output</h4>
-                <pre style={{ 
+              <div style={{ marginTop: '1.5rem' }}>
+                <h4 style={{ 
+                  color: isDarkMode ? 'white' : '#1a202c',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  borderBottom: isDarkMode ? '1px solid #2d3748' : '1px solid #eaeaea',
+                  paddingBottom: '8px'
+                }}>
+                  <span>Command Output</span>
+                  <span style={{ 
+                    fontSize: '0.8rem', 
+                    color: isDarkMode ? '#aaa' : '#666',
+                    fontWeight: 'normal'
+                  }}>
+                    Technical Details
+                  </span>
+                </h4>
+                <div style={{ 
                   backgroundColor: isDarkMode ? '#2d3748' : '#f5f5f5', 
                   color: isDarkMode ? '#e2e8f0' : '#1a202c',
-                  padding: '1rem', 
+                  padding: '12px', 
                   borderRadius: '5px',
-                  overflowX: 'auto',
-                  fontSize: '0.9rem'
+                  marginTop: '10px',
+                  position: 'relative'
                 }}>
-                  {scanResult.rawOutput}
-                </pre>
+                  <div style={{ position: 'absolute', top: '8px', right: '12px' }}>
+                    <div style={{ 
+                      padding: '2px 8px',
+                      fontSize: '0.75rem',
+                      backgroundColor: isDarkMode ? '#1a202c' : '#e2e8f0',
+                      color: isDarkMode ? '#e2e8f0' : '#1a202c',
+                      borderRadius: '4px',
+                      fontFamily: 'monospace'
+                    }}>
+                      {scanType === 'fuzz' ? 'ffuf' : scanType} output
+                    </div>
+                  </div>
+                  
+                  <pre style={{ 
+                    overflowX: 'auto',
+                    fontSize: '0.85rem',
+                    marginTop: '12px',
+                    fontFamily: 'Consolas, Monaco, "Andale Mono", monospace',
+                    maxHeight: '300px'
+                  }}>
+                    {scanResult.rawOutput}
+                  </pre>
+                </div>
               </div>
             )}
             
