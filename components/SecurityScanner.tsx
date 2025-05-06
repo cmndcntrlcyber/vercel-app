@@ -90,8 +90,10 @@ export default function SecurityScanner() {
   
   // Dark mode detection
   const [isDarkMode, setIsDarkMode] = useState(false);
+  // Add state for screen width
+  const [screenWidth, setScreenWidth] = useState(1024);
   
-  // Effect to detect dark mode
+  // Effect to detect dark mode and screen width
   useEffect(() => {
     // Check if window is available (client-side)
     if (typeof window !== 'undefined') {
@@ -99,20 +101,30 @@ export default function SecurityScanner() {
       const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       setIsDarkMode(darkModeMediaQuery.matches);
       
-      // Set up listener for changes
+      // Set initial screen width
+      setScreenWidth(window.innerWidth);
+      
+      // Set up listener for dark mode changes
       const darkModeChangeHandler = (e: MediaQueryListEvent) => {
         setIsDarkMode(e.matches);
       };
       
-      // Add listener
+      // Set up listener for window resize
+      const handleResize = () => {
+        setScreenWidth(window.innerWidth);
+      };
+      
+      // Add listeners
       darkModeMediaQuery.addEventListener('change', darkModeChangeHandler);
+      window.addEventListener('resize', handleResize);
       
       // Clean up
       return () => {
         darkModeMediaQuery.removeEventListener('change', darkModeChangeHandler);
+        window.removeEventListener('resize', handleResize);
       };
     }
-  });
+  }, []);
   
   // HTML report reference for download
   const reportRef = useRef<HTMLDivElement>(null);
@@ -286,12 +298,12 @@ export default function SecurityScanner() {
         }}>
           <div style={{
             display: "flex",
-            flexDirection: window.innerWidth < 768 ? "column" : "row",
+            flexDirection: screenWidth < 768 ? "column" : "row",
             justifyContent: "space-between",
             width: "100%",
             backgroundColor: "#2563eb",
             borderRadius: "12px",
-            padding: window.innerWidth < 768 ? "16px" : "24px",
+            padding: screenWidth < 768 ? "16px" : "24px",
             color: "white",
             marginBottom: "20px",
             boxShadow: "0 4px 15px rgba(37, 99, 235, 0.3)"
@@ -302,11 +314,11 @@ export default function SecurityScanner() {
               flexDirection: "column",
               justifyContent: "center",
               alignItems: "flex-start",
-              paddingRight: window.innerWidth < 768 ? "0" : "24px",
-              borderRight: window.innerWidth < 768 ? "none" : "1px solid rgba(255, 255, 255, 0.2)",
-              borderBottom: window.innerWidth < 768 ? "1px solid rgba(255, 255, 255, 0.2)" : "none",
-              paddingBottom: window.innerWidth < 768 ? "12px" : "0",
-              marginBottom: window.innerWidth < 768 ? "12px" : "0"
+              paddingRight: screenWidth < 768 ? "0" : "24px",
+              borderRight: screenWidth < 768 ? "none" : "1px solid rgba(255, 255, 255, 0.2)",
+              borderBottom: screenWidth < 768 ? "1px solid rgba(255, 255, 255, 0.2)" : "none",
+              paddingBottom: screenWidth < 768 ? "12px" : "0",
+              marginBottom: screenWidth < 768 ? "12px" : "0"
             }}>
               <h3 style={{ margin: "0 0 10px 0", fontSize: "1.5rem", fontWeight: "bold" }}>Security Scanner</h3>
               <p style={{ margin: "0 0 15px 0", fontSize: "0.95rem", opacity: "0.9" }}>
@@ -332,7 +344,7 @@ export default function SecurityScanner() {
               flexDirection: "column",
               justifyContent: "space-between",
               alignItems: "flex-start",
-              paddingLeft: window.innerWidth < 768 ? "0" : "24px",
+              paddingLeft: screenWidth < 768 ? "0" : "24px",
               gap: "16px"
             }}>
               <div style={{ width: "100%" }}>

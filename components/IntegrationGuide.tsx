@@ -144,8 +144,10 @@ export default function IntegrationGuide() {
         <button
           className="button button-primary mx-auto"
           onClick={() => {
-            navigator.clipboard.writeText(generateEmbedCode());
-            alert('Embed code copied to clipboard!');
+            if (typeof window !== 'undefined') {
+              navigator.clipboard.writeText(generateEmbedCode());
+              alert('Embed code copied to clipboard!');
+            }
           }}
         >
           Copy Code
@@ -163,8 +165,10 @@ export default function IntegrationGuide() {
         <button
           className="button button-primary mx-auto"
           onClick={() => {
-            navigator.clipboard.writeText(generateIframeCode());
-            alert('Iframe code copied to clipboard!');
+            if (typeof window !== 'undefined') {
+              navigator.clipboard.writeText(generateIframeCode());
+              alert('Iframe code copied to clipboard!');
+            }
           }}
         >
           Copy Code
